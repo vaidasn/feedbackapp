@@ -1,9 +1,9 @@
-##Business case
+## Business case
 
 Company X wants to collect feedback from candidates and they would like to do this electronically.
 They also would like to be able to review this feedback online with the ability to search in any field.
 
-##Task
+## Task
 
 Implement the feedback form itself and the feedback review functionality. Feedback form has to save
 the feedback and send the feedback to a defined mailbox. Feedback review functionality is only for
