@@ -1,25 +1,37 @@
 package com.intermedix.onboarding.feedbackapp.feedback;
 
+import java.util.Date;
+
 public class Feedback {
 
-    private String firstName;
-    private String lastName;
+    public static long nextId = 0;
+    private long id = ++nextId;
+    private Date created;
+    private Person person;
     private String message;
 
-    public String getFirstName() {
-        return firstName;
+    public Feedback() {
+        created = new Date(new Date().getTime() - (long)(Math.random() * 31_000_000_000.));
     }
 
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
+    public Feedback(Date created) {
+        this.created = created;
     }
 
-    public String getLastName() {
-        return lastName;
+    public long getId() {
+        return id;
     }
 
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
+    public Date getCreated() {
+        return created;
+    }
+
+    public Person getPerson() {
+        return person;
+    }
+
+    public void setPerson(Person person) {
+        this.person = person;
     }
 
     public String getMessage() {

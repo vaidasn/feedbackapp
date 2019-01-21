@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <!--/*/<th:block th:insert="fragments/layout.html :: headFragment"/>/*/-->
+<body>
+<!--/*/<th:block th:replace="fragments/layout.html :: headerFragment"></th:block>/*/-->
+<div class="card">
+  <div class="card-body">
+    <h3 class="card-title" id="title">Add New Person Feedback</h3>
+    <form action="#" th:action="@{/feedback}" th:object="${feedback}" method="post">
+      <input type="hidden" name="personId" value="-1">
+      <div class="row">
+        <div class="col">
+          <div class="form-group">
+            <label for="person.firstName">First name</label>
+            <input type="text" class="form-control" th:field="*{person.firstName}" placeholder="Enter first name">
+          </div>
+        </div>
+        <div class="col">
+          <div class="form-group">
+            <label for="person.lastName">Last name</label>
+            <input type="text" class="form-control" th:field="*{person.lastName}" placeholder="Enter last name">
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="message">Message</label>
+        <textarea rows="5" class="form-control" th:field="*{message}" placeholder="Enter feedback message"></textarea>
+      </div>
+      <button type="submit" class="btn btn-primary">Add</button>
+      <a th:href="@{/view-feedback}" class="btn btn-primary">Cancel</a>
+    </form>
+  </div>
+</div>
+<!--/*/<th:block th:replace="fragments/layout.html :: footerFragment"></th:block>/*/-->
+</body>
+</html>

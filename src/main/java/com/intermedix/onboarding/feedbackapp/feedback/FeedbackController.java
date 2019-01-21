@@ -13,16 +13,24 @@ import java.util.Map;
 public class FeedbackController {
 
     @GetMapping("/feedback")
-    public String feedbackForm(@RequestParam Map<String, String> parameters, Model model) {
-        if (parameters.isEmpty()) {
-            model.addAttribute("feedback",  new Feedback());
-            return "feedback-form";
+    public String feedbackForm(@RequestParam(required = false) Long personId, @RequestParam(required = false) String personFirstName,
+            @RequestParam(required = false) String personLastName, Model model) {
+        if (personId == null || personFirstName == null || personLastName == null) {
+            model.addAttribute("feedback", new Feedback());
+            return "feedback-new-person";
         }
-        return "feedback";
+
+        Person person = new Person(personId);
+        person.setFirstName(personFirstName);
+        person.setLastName(personLastName);
+        Feedback feedback = new Feedback();
+        feedback.setPerson(person);
+        model.addAttribute("feedback", feedback);
+        return "feedback-existing-person";
     }
 
     @PostMapping("/feedback")
     public String feedbackSubmit(@ModelAttribute Feedback feedback) {
-        return "feedback";
+        return "redirect:/view-feedback";
     }
 }
