@@ -9,6 +9,8 @@
     <h3 class="card-title" id="title">Add Feedback for the Person</h3>
     <form action="#" th:action="@{/feedback}" th:object="${feedback}" method="post">
       <input type="hidden" th:field="*{person.id}">
+      <input type="hidden" th:field="*{person.firstName}">
+      <input type="hidden" th:field="*{person.lastName}">
       <div class="row">
         <div class="col">
           <div class="form-group">

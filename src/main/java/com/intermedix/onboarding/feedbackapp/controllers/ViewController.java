@@ -1,17 +1,10 @@
-package com.intermedix.onboarding.feedbackapp.view;
+package com.intermedix.onboarding.feedbackapp.controllers;
 
-import com.intermedix.onboarding.feedbackapp.feedback.Feedback;
-import com.intermedix.onboarding.feedbackapp.feedback.FeedbackController;
-import com.intermedix.onboarding.feedbackapp.feedback.FeedbackRepository;
-import com.intermedix.onboarding.feedbackapp.feedback.Person;
+import com.intermedix.onboarding.feedbackapp.persistence.FeedbackRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
 
 @Controller
 public class ViewController {

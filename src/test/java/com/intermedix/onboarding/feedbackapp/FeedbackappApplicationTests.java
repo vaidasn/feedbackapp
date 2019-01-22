@@ -1,7 +1,7 @@
 package com.intermedix.onboarding.feedbackapp;
 
-import com.intermedix.onboarding.feedbackapp.feedback.FeedbackController;
-import com.intermedix.onboarding.feedbackapp.view.ViewController;
+import com.intermedix.onboarding.feedbackapp.controllers.FeedbackController;
+import com.intermedix.onboarding.feedbackapp.controllers.ViewController;
 import org.junit.*;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;

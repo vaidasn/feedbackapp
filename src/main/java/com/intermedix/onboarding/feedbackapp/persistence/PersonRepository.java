@@ -1,8 +1,6 @@
-package com.intermedix.onboarding.feedbackapp.feedback;
+package com.intermedix.onboarding.feedbackapp.persistence;
 
 import org.springframework.data.repository.CrudRepository;
-
-import java.util.Collection;
 
 public interface PersonRepository extends CrudRepository<Person, Long> {
 

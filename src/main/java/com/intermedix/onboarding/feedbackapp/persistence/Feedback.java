@@ -1,4 +1,4 @@
-package com.intermedix.onboarding.feedbackapp.feedback;
+package com.intermedix.onboarding.feedbackapp.persistence;
 
 import org.hibernate.annotations.GenericGenerator;
 

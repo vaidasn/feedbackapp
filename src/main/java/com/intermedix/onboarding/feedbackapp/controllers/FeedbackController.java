@@ -1,5 +1,9 @@
-package com.intermedix.onboarding.feedbackapp.feedback;
+package com.intermedix.onboarding.feedbackapp.controllers;
 
+import com.intermedix.onboarding.feedbackapp.persistence.Feedback;
+import com.intermedix.onboarding.feedbackapp.persistence.FeedbackRepository;
+import com.intermedix.onboarding.feedbackapp.persistence.Person;
+import com.intermedix.onboarding.feedbackapp.persistence.PersonRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
