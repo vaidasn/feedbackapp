@@ -11,7 +11,12 @@
   <script th:replace="fragments/scripts.html :: datatables-api-row-show"></script>
   <script type="text/javascript" language="javascript">
       $(document).ready(function() {
-          var table = $('#all-feedback').DataTable();
+          var table = $('#all-feedback').DataTable({
+              stateSave: true,
+              language: {
+                  zeroRecords: "No feedback yet"
+              }
+          });
           var rows = table.rows('.recent');
           if (rows.any()) {
               var lastRowIndex = rows.count() - 1;
@@ -60,9 +65,9 @@
           <td th:text="${feedback.person.firstName}"></td>
           <td th:text="${feedback.person.lastName}"></td>
           <td>
-            <a href="#" th:href="@{/feedback(personId=${feedback.person.id},personFirstName=${feedback.person.firstName},personLastName=${feedback.person.lastName})}"><i class="fa fa-plus"></i></a>
-            <span th:text="${#strings.abbreviate(feedback.message, 30)}"></span>
-            <a th:href="'#collapsedMessageDetails-' + ${feedback.id}" data-toggle="collapse" th:if="${#strings.length(feedback.message)} > 30"><i class="message-details arrow down"></i></a>
+            <a href="#" th:href="@{/feedback(personId=${feedback.person.id})}"><i class="fa fa-plus"></i></a>
+            <span class="d-inline-block text-truncate" style="max-width: 50ch;" th:text="${feedback.message}"></span>
+            <a th:href="'#collapsedMessageDetails-' + ${feedback.id}" data-toggle="collapse" th:if="${#strings.length(feedback.message)} > 50"><i class="message-details arrow down"></i></a>
             <div class="collapse" th:id="'collapsedMessageDetails-' + ${feedback.id}">
               <div class="card card-body" th:utext="${#strings.replace(#strings.escapeXml(feedback.message), '&#xA;' ,'&lt;br&gt;')}"></div>
             </div>
