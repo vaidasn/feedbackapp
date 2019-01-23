@@ -31,7 +31,7 @@ public class Feedback {
     }
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO, generator="native")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "native")
     @GenericGenerator(name = "native", strategy = "native")
     @Column(name = "feedback_id", nullable = false)
     public long getId() {

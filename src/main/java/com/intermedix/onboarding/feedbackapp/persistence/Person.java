@@ -36,7 +36,7 @@ public class Person {
     }
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO, generator="native")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "native")
     @GenericGenerator(name = "native", strategy = "native")
     @Column(name = "person_id", nullable = false)
     public long getId() {
@@ -65,7 +65,7 @@ public class Person {
         this.lastName = lastName;
     }
 
-    @OneToMany(cascade= CascadeType.ALL, mappedBy = "person")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "person")
     public Collection<Feedback> getRelatedFeedback() {
         return relatedFeedback;
     }

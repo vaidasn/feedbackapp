@@ -42,7 +42,13 @@ public class FeedbackController {
     @PostMapping("/feedback")
     @Transactional
     public String feedbackSubmit(@ModelAttribute Feedback feedback) {
-        Person person = personRepository.save(feedback.getPerson());
+        Person feedbackPerson = feedback.getPerson();
+        Person person;
+        if (feedbackPerson.getId() < 0L) {
+            person = personRepository.save(feedbackPerson);
+        } else {
+            person = personRepository.findById(feedbackPerson.getId()).get();
+        }
         feedback.setPerson(person);
         feedback.setCreated(new Date());
         feedbackRepository.save(feedback);
