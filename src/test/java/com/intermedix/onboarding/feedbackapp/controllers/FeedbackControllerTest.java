@@ -4,9 +4,9 @@ import com.intermedix.onboarding.feedbackapp.persistence.Feedback;
 import com.intermedix.onboarding.feedbackapp.persistence.FeedbackRepository;
 import com.intermedix.onboarding.feedbackapp.persistence.Person;
 import com.intermedix.onboarding.feedbackapp.persistence.PersonRepository;
+import com.intermedix.onboarding.feedbackapp.services.MailService;
 import org.junit.*;
 import org.junit.runner.*;
-import org.mockito.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -14,6 +14,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.ui.Model;
 
+import javax.mail.MessagingException;
 import java.util.Optional;
 
 import static org.junit.Assert.*;
@@ -42,6 +43,9 @@ public class FeedbackControllerTest {
 
     @MockBean
     Model testModel;
+
+    @MockBean
+    private MailService mailService;
 
     @Before
     public void setUp() throws Exception {
@@ -73,7 +77,7 @@ public class FeedbackControllerTest {
     }
 
     @Test
-    public void feedbackSubmitNewPerson() {
+    public void feedbackSubmitNewPerson() throws MessagingException {
         Person feedbackPerson = new Person();
         feedbackPerson.setFirstName("First");
         feedbackPerson.setLastName("Last");
@@ -89,10 +93,11 @@ public class FeedbackControllerTest {
         verify(personRepository).save(feedbackPerson);
         verify(feedbackRepository).save(feedback1);
         verifyNoMoreInteractions(personRepository);
-
+        verify(mailService).sendFeedbackNotification(any(Feedback.class));
     }
 
-    public void feedbackSubmitExistingPerson() {
+    @Test
+    public void feedbackSubmitExistingPerson() throws MessagingException {
         Person feedbackPerson = new Person(1L);
         Feedback feedback1 = new Feedback();
         feedback1.setPerson(feedbackPerson);
@@ -108,7 +113,7 @@ public class FeedbackControllerTest {
         verify(personRepository).findById(1L);
         verify(feedbackRepository).save(feedback1);
         verifyNoMoreInteractions(personRepository);
-
+        verify(mailService).sendFeedbackNotification(any(Feedback.class));
     }
 
 }

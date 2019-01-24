@@ -4,6 +4,7 @@ import com.intermedix.onboarding.feedbackapp.persistence.Feedback;
 import com.intermedix.onboarding.feedbackapp.persistence.FeedbackRepository;
 import com.intermedix.onboarding.feedbackapp.persistence.Person;
 import com.intermedix.onboarding.feedbackapp.persistence.PersonRepository;
+import com.intermedix.onboarding.feedbackapp.services.MailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import javax.mail.MessagingException;
 import java.util.Date;
 
 @Controller
@@ -23,6 +25,9 @@ public class FeedbackController {
 
     @Autowired
     private PersonRepository personRepository;
+
+    @Autowired
+    private MailService mailService;
 
     @GetMapping("/feedback")
     @Transactional
@@ -41,7 +46,7 @@ public class FeedbackController {
 
     @PostMapping("/feedback")
     @Transactional
-    public String feedbackSubmit(@ModelAttribute Feedback feedback) {
+    public String feedbackSubmit(@ModelAttribute Feedback feedback) throws MessagingException {
         Person feedbackPerson = feedback.getPerson();
         Person person;
         if (feedbackPerson.getId() < 0L) {
@@ -52,6 +57,7 @@ public class FeedbackController {
         feedback.setPerson(person);
         feedback.setCreated(new Date());
         feedbackRepository.save(feedback);
+        mailService.sendFeedbackNotification(feedback);
         return "redirect:/view-feedback";
     }
 }
