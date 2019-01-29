@@ -9,29 +9,17 @@
   </style>
   <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js" integrity="sha384-JPbtLYL10d/Z1crlc6GGGGM3PavCzzoUJ1UxH0bXHOfguWHQ6XAWrIzW+MBGGXe5" crossorigin="anonymous"></script>
   <script th:replace="fragments/scripts.html :: datatables-api-row-show"></script>
+  <script th:inline="javascript">
+    /*<![CDATA[*/
+      var hrefContext = /*[[@{/}]]*/ '';
+      if (hrefContext.endsWith('/')) {
+          hrefContext = hrefContext.slice(0, -1);
+      }
+    /*]]>*/
+  </script>
   <script type="text/javascript" language="javascript">
       $(document).ready(function() {
-          var table = $('#all-feedback').DataTable({
-              stateSave: true,
-              language: {
-                  zeroRecords: "No feedback yet"
-              }
-          });
-          var rows = table.rows('.recent');
-          if (rows.any()) {
-              var lastRowIndex = rows.count() - 1;
-              rows.every(function (rowNum, tableIndex, rowIndex) {
-                 if (rowIndex !== lastRowIndex) {
-                     return;
-                 }
-                 this.show().draw('page');
-              });
-              rows.nodes().to$().css('background-color', 'yellow');
-              rows.nodes().to$().animate({
-                  backgroundColor: "inherit"
-              }, 5000, "swing");
-          }
-          $('.message-details').click(function () {
+          var messageDetailsArrowClicked = function () {
               if ($(this).hasClass('down')) {
                   $(this).removeClass('down');
                   $(this).addClass('up');
@@ -39,7 +27,66 @@
                   $(this).removeClass('up');
                   $(this).addClass('down');
               }
-          })
+          };
+          var table = $('#all-feedback').DataTable({
+              stateSave: true,
+              language: {
+                  zeroRecords: "No feedback yet"
+              },
+              ajax: "/data/feedback",
+              columnDefs: [
+                  {
+                      targets: 0,
+                      createdCell: function (td, cellData) {
+                          var changeDate = moment(cellData);
+                          $(td).text(changeDate.format('YYYY-MM-DD HH:SS'))
+                      }
+                  },
+                  {
+                      targets: 3,
+                      createdCell: function (td, cellData) {
+                          if (cellData.message.length <= 50) {
+                              $(td).html($('#shortMessageTemplate').clone());
+                              $('.person-placeholder', td).attr('href', hrefContext + '/feedback?personId=' + cellData.personId).removeClass('person-placeholder');
+                              $('.message-placeholder', td).text(cellData.message).removeClass('message-placeholder');
+                          } else {
+                              $(td).html($('#longMessageTemplate').clone());
+                              $('.person-placeholder', td).attr('href', hrefContext + '/feedback?personId=' + cellData.personId).removeClass('person-placeholder');;
+                              $('.message-placeholder', td).text(cellData.message).removeClass('message-placeholder');
+                              $('.collapse-message-details-placeholder', td).attr('href', '#collapsedMessageDetails-' + cellData.feedbackId).removeClass('collapse-message-details-placeholder');
+                              $('.message-details-id-placeholder', td).attr('id', 'collapsedMessageDetails-' + cellData.feedbackId).removeClass('message-details-id-placeholder');
+                              var messageDetailsContent = $('.message-details-placeholder', td).removeClass('message-details-placeholder');
+                              cellData.message.split(/\r?\n/).forEach(function (messageLine) {
+                                  messageDetailsContent.append($('<p></p>').text(messageLine));
+                              });
+                              $('.message-details', td).click(messageDetailsArrowClicked)
+                          }
+                      }
+                  }
+              ],
+              createdRow: function (tr, rowData) {
+                  $(tr).attr('id', 'row-' + rowData[3].feedbackId);
+                  if (rowData[5] + 6000 > new Date().getTime()) {
+                      $(tr).addClass('recent');
+                  }
+              },
+              initComplete: function () {
+                  var rows = table.rows('.recent');
+                  if (rows.any()) {
+                      var lastRowIndex = rows.count() - 1;
+                      rows.every(function (rowNum, tableIndex, rowIndex) {
+                          if (rowIndex !== lastRowIndex) {
+                              return;
+                          }
+                          this.show().draw('page');
+                      });
+                      rows.nodes().to$().css('background-color', 'yellow');
+                      rows.nodes().to$().animate({
+                          backgroundColor: "inherit"
+                      }, 5000, "swing");
+                  }
+              }
+          });
       } );
   </script>
 </head>
@@ -57,27 +104,26 @@
         <th scope="col" class="col-sm-6">Message</th>
       </tr>
       </thead>
-      <tbody>
-        <tr th:each="feedback : ${allFeedback}"
-            th:id="'row-' + ${feedback.id}"
-            th:classappend="${feedback.created.time > #dates.createNow().time - 6000}? 'recent'">
-          <td th:text="${#dates.format(feedback.created, 'yyyy-MM-dd HH:mm')}"></td>
-          <td th:text="${feedback.person.firstName}"></td>
-          <td th:text="${feedback.person.lastName}"></td>
-          <td>
-            <a href="#" th:href="@{/feedback(personId=${feedback.person.id})}"><i class="fa fa-plus"></i></a>
-            <span class="d-inline-block text-truncate" style="max-width: 50ch;" th:text="${feedback.message}"></span>
-            <a th:href="'#collapsedMessageDetails-' + ${feedback.id}" data-toggle="collapse" th:if="${#strings.length(feedback.message)} > 50"><i class="message-details arrow down"></i></a>
-            <div class="collapse" th:id="'collapsedMessageDetails-' + ${feedback.id}">
-              <div class="card card-body" th:utext="${#strings.replace(#strings.escapeXml(feedback.message), '&#xA;' ,'&lt;br&gt;')}"></div>
-            </div>
-          </td>
-        </tr>
-      </tbody>
     </table>
     <a href="#" th:href="@{/feedback}" class="btn btn-primary"><i class="fa fa-plus"></i> New person feedback</a>
   </div>
 </div>
 <!--/*/<th:block th:replace="fragments/layout.html :: footerFragment"></th:block>/*/-->
+<div style="display: none">
+  <span id="shortMessageTemplate">
+    <a class="person-placeholder" href="#"><i class="fa fa-plus"></i></a>
+    <span class="d-inline-block text-truncate message-placeholder" style="max-width: 50ch;"></span>
+  </span>
+  <span id="longMessageTemplate">
+    <a class="person-placeholder" href="#"><i class="fa fa-plus"></i></a>
+    <span class="d-inline-block text-truncate message-placeholder" style="max-width: 50ch;"></span>
+    <a class="collapse-message-details-placeholder" href="#collapsedMessageDetails" data-toggle="collapse">
+      <i class="message-details arrow down"></i>
+    </a>
+    <div class="collapse message-details-id-placeholder" id="collapsedMessageDetails">
+      <div class="card card-body message-details-placeholder"></div>
+    </div>
+  </span>
+</div>
 </body>
 </html>
