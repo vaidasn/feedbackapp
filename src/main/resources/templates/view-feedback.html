@@ -34,39 +34,35 @@
                   zeroRecords: "No feedback yet"
               },
               ajax: "/data/feedback",
+              renderer: "bootstrap",
               columnDefs: [
                   {
                       targets: 0,
                       createdCell: function (td, cellData) {
                           var changeDate = moment(cellData);
-                          $(td).text(changeDate.format('YYYY-MM-DD HH:SS'))
+                          $(td).text(changeDate.format('YYYY-MM-DD HH:mm'))
                       }
                   },
                   {
                       targets: 3,
                       createdCell: function (td, cellData) {
-                          if (cellData.message.length <= 50) {
-                              $(td).html($('#shortMessageTemplate').clone());
-                              $('.person-placeholder', td).attr('href', hrefContext + '/feedback?personId=' + cellData.personId).removeClass('person-placeholder');
-                              $('.message-placeholder', td).text(cellData.message).removeClass('message-placeholder');
-                          } else {
-                              $(td).html($('#longMessageTemplate').clone());
-                              $('.person-placeholder', td).attr('href', hrefContext + '/feedback?personId=' + cellData.personId).removeClass('person-placeholder');;
-                              $('.message-placeholder', td).text(cellData.message).removeClass('message-placeholder');
-                              $('.collapse-message-details-placeholder', td).attr('href', '#collapsedMessageDetails-' + cellData.feedbackId).removeClass('collapse-message-details-placeholder');
-                              $('.message-details-id-placeholder', td).attr('id', 'collapsedMessageDetails-' + cellData.feedbackId).removeClass('message-details-id-placeholder');
-                              var messageDetailsContent = $('.message-details-placeholder', td).removeClass('message-details-placeholder');
-                              cellData.message.split(/\r?\n/).forEach(function (messageLine) {
-                                  messageDetailsContent.append($('<p></p>').text(messageLine));
-                              });
-                              $('.message-details', td).click(messageDetailsArrowClicked)
-                          }
+                          $(td).addClass('message-column-td-truncate');
+                          $(td).html($('#longMessageTemplate').clone().removeAttr('id'));
+                          $('.person-placeholder', td).attr('href', hrefContext + '/feedback?personId=' + cellData.personId).removeClass('person-placeholder');;
+                          $('.message-placeholder', td).text(cellData.message).removeClass('message-placeholder');
+                          $('.collapse-message-details-placeholder', td).attr('href', '#collapsedMessageDetails-' + cellData.feedbackId).removeClass('collapse-message-details-placeholder');
+                          $('.message-details-id-placeholder', td).attr('id', 'collapsedMessageDetails-' + cellData.feedbackId).removeClass('message-details-id-placeholder');
+                          var messageDetailsContent = $('.message-details-placeholder', td).removeClass('message-details-placeholder');
+                          cellData.message.split(/\r?\n/).forEach(function (messageLine) {
+                              messageDetailsContent.append($('<p></p>').text(messageLine));
+                          });
+                          $('.message-details', td).click(messageDetailsArrowClicked)
                       }
                   }
               ],
               createdRow: function (tr, rowData) {
                   $(tr).attr('id', 'row-' + rowData[3].feedbackId);
-                  if (rowData[5] + 6000 > new Date().getTime()) {
+                  if (rowData[0] + 6000 > new Date().getTime()) {
                       $(tr).addClass('recent');
                   }
               },
@@ -87,6 +83,33 @@
                   }
               }
           });
+          var handleTruncate = function() {
+              var messageWidth = $('#message-column').get(0).clientWidth - 28;
+              $('.message-column-td-truncate-body').css('max-width', messageWidth + 'px');
+              $('.message-column-td-truncate-right-side').css('left', (messageWidth + 2) + 'px');
+              $('.text-truncate').each(function () {
+                  var truncateRightSide = $('.message-column-td-truncate-right-side', this.parentElement.parentElement);
+                  if (this.parentElement.clientWidth === this.parentElement.scrollWidth) {
+                      truncateRightSide.hide();
+                  } else {
+                      truncateRightSide.show();
+                  }
+              });
+          };
+          var handleTruncateOnDraw = false;
+          var forceHandleTruncate = function() {
+              handleTruncateOnDraw = true;
+          };
+          $('#all-feedback')
+              .on('column-sizing.dt', handleTruncate)
+              .on('page.dt', forceHandleTruncate)
+              .on('length.dt', forceHandleTruncate)
+              .on('draw.dt', function () {
+                  if (handleTruncateOnDraw) {
+                      handleTruncateOnDraw = false;
+                      handleTruncate();
+                  }
+              });
       } );
   </script>
 </head>
@@ -95,13 +118,13 @@
 <div class="card">
   <div class="card-body">
     <h3 class="card-title" id="title">Feedback</h3>
-    <table class="table table-bordered table-condensed" id="all-feedback">
+    <table class="table table-bordered table-condensed" style="width: 100%" id="all-feedback">
       <thead>
       <tr>
         <th scope="col" class="col-sm-2">Date</th>
         <th scope="col" class="col-sm-2">First Name</th>
         <th scope="col" class="col-sm-2">Last Name</th>
-        <th scope="col" class="col-sm-6">Message</th>
+        <th scope="col" class="col-sm-6" id="message-column">Message</th>
       </tr>
       </thead>
     </table>
@@ -112,16 +135,18 @@
 <div style="display: none">
   <span id="shortMessageTemplate">
     <a class="person-placeholder" href="#"><i class="fa fa-plus"></i></a>
-    <span class="d-inline-block text-truncate message-placeholder" style="max-width: 50ch;"></span>
+    <span class="d-inline-block text-truncate message-placeholder"></span>
   </span>
   <span id="longMessageTemplate">
-    <a class="person-placeholder" href="#"><i class="fa fa-plus"></i></a>
-    <span class="d-inline-block text-truncate message-placeholder" style="max-width: 50ch;"></span>
-    <a class="collapse-message-details-placeholder" href="#collapsedMessageDetails" data-toggle="collapse">
+    <div class="message-column-td-truncate-body">
+      <span class="td-truncate-padding"></span><a class="person-placeholder" href="#"><i class="fa fa-plus"></i></a>
+      <span class="text-truncate message-placeholder"></span>
+    </div>
+    <a class="message-column-td-truncate-right-side collapse-message-details-placeholder" href="#collapsedMessageDetails" data-toggle="collapse">
       <i class="message-details arrow down"></i>
     </a>
     <div class="collapse message-details-id-placeholder" id="collapsedMessageDetails">
-      <div class="card card-body message-details-placeholder"></div>
+      <p>&nbsp;</p><div class="card card-body message-details-placeholder"></div>
     </div>
   </span>
 </div>
