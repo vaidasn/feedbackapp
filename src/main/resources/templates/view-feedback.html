@@ -31,10 +31,12 @@
           var table = $('#all-feedback').DataTable({
               stateSave: true,
               language: {
-                  zeroRecords: "No feedback yet"
+                  zeroRecords: "No feedback available"
               },
               ajax: "/data/feedback",
               renderer: "bootstrap",
+              processing: true,
+              serverSide: true,
               columnDefs: [
                   {
                       targets: 0,
