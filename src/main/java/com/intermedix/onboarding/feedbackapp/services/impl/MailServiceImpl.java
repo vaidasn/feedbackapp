@@ -59,17 +59,17 @@ public class MailServiceImpl implements MailService {
                     }
                 });
 
-        Message message = new MimeMessage(session);
+        MimeMessage message = new MimeMessage(session);
         message.setFrom(new InternetAddress(fromEmail));
         message.setRecipients(Message.RecipientType.TO,
                 InternetAddress.parse(toEmail));
-        message.setSubject(emailSubject);
+        message.setSubject(emailSubject, "UTF-8");
         message.setText(String.format(
                 "Date: %tF %<tR\n" +
                 "Person: %s %s\n" +
                 "Message:\n" +
                 "%s", feedback.getCreated(), feedback.getPerson().getFirstName(), feedback.getPerson().getLastName(),
-                feedback.getMessage()));
+                feedback.getMessage()), "UTF-8", "plain");
 
         mailTransport.send(message);
     }
