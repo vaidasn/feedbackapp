@@ -28,6 +28,7 @@
                   $(this).addClass('down');
               }
           };
+          var handleRecent = false;
           var table = $('#all-feedback').DataTable({
               stateSave: true,
               language: {
@@ -69,19 +70,14 @@
                   }
               },
               initComplete: function () {
-                  var rows = table.rows('.recent');
-                  if (rows.any()) {
-                      var lastRowIndex = rows.count() - 1;
-                      rows.every(function (rowNum, tableIndex, rowIndex) {
-                          if (rowIndex !== lastRowIndex) {
-                              return;
-                          }
-                          this.show().draw('page');
+                  if (table.ajax.json().newestCreated + 6000 > new Date().getTime()) {
+                      setTimeout(function() {
+                          table.column(0).order('asc').draw();
+                          setTimeout(function () {
+                              table.page('last').draw('page');
+                              handleRecent = true;
+                          });
                       });
-                      rows.nodes().to$().css('background-color', 'yellow');
-                      rows.nodes().to$().animate({
-                          backgroundColor: "inherit"
-                      }, 5000, "swing");
                   }
               }
           });
@@ -110,6 +106,16 @@
                   if (handleTruncateOnDraw) {
                       handleTruncateOnDraw = false;
                       handleTruncate();
+                  }
+                  if (handleRecent) {
+                      handleRecent = false;
+                      var rows = table.rows('.recent');
+                      if (rows.any()) {
+                          rows.nodes().to$().css('background-color', 'yellow');
+                          rows.nodes().to$().animate({
+                              backgroundColor: "inherit"
+                          }, 5000, "swing");
+                      }
                   }
               });
       } );

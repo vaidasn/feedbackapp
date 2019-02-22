@@ -76,11 +76,12 @@ public class DataControllerTest {
         ResultActions mvcResult = mvc.perform(get("/data/feedback?draw=123")
                 .contentType(MediaType.APPLICATION_JSON)).andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.*", hasSize(4)));
+                .andExpect(jsonPath("$.*", hasSize(5)));
         assertFeedbackData(singleFeedback.getCreated().getTime(), "Short message", mvcResult);
         mvcResult.andExpect(jsonPath("$.draw", is(123)));
         mvcResult.andExpect(jsonPath("$.recordsTotal", is(1)));
         mvcResult.andExpect(jsonPath("$.recordsFiltered", is(1)));
+        mvcResult.andExpect(jsonPath("$.newestCreated", is(singleFeedback.getCreated().getTime())));
     }
 
     private Feedback mockSingleFeedback(String singleFeedbackMessage, Pageable pageable) {

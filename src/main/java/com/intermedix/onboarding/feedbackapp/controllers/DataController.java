@@ -15,13 +15,17 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 @RestController
 public class DataController {
 
-    @Autowired
     private FeedbackRepository feedbackRepository;
+
+    public DataController(@Autowired FeedbackRepository feedbackRepository) {
+        this.feedbackRepository = feedbackRepository;
+    }
 
     @GetMapping("/data/feedback")
     public Map<String, Object> getFeedbackData(@RequestParam(defaultValue = "-1") int draw, @RequestParam(defaultValue = "0") int start,
@@ -48,6 +52,7 @@ public class DataController {
         allFeedback.put("draw", draw);
         allFeedback.put("recordsTotal", feedbackRepository.findAllPageable(Pageable.unpaged()).getTotalElements());
         allFeedback.put("recordsFiltered", feedbackResult.getTotalElements());
+        allFeedback.put("newestCreated", findNewestCreated());
         return allFeedback;
     }
 
@@ -97,6 +102,13 @@ public class DataController {
             collectedFeedbackData.add(feedbackData);
         }
         return collectedFeedbackData;
+    }
+
+    private long findNewestCreated() {
+        Page<Feedback> newestCreatedPage =
+                feedbackRepository.findAllPageable(PageRequest.of(0, 1, Sort.Direction.DESC, "created"));
+        Iterator<Feedback> newestCreatedIterator = newestCreatedPage.iterator();
+        return newestCreatedIterator.hasNext() ? newestCreatedIterator.next().getCreated().getTime() : 0;
     }
 
 }
