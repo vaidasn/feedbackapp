@@ -73,15 +73,27 @@ public class DataControllerTest {
     @Test
     public void allFeedbackDataSingleShortServerSide() throws Exception {
         Feedback singleFeedback = mockSingleFeedback("Short message", Mockito.any(Pageable.class));
-        ResultActions mvcResult = mvc.perform(get("/data/feedback?draw=123")
+        partiallyAssertServerSide(singleFeedback, "/data/feedback?draw=123", 4);
+    }
+
+    @Test
+    public void allFeedbackDataSingleShortServerSideNewestCreated() throws Exception {
+        Feedback singleFeedback = mockSingleFeedback("Short message", Mockito.any(Pageable.class));
+        ResultActions mvcResult =
+                partiallyAssertServerSide(singleFeedback, "/data/feedback?draw=123&findNewestCreated=true", 5);
+        mvcResult.andExpect(jsonPath("$.newestCreated", is(singleFeedback.getCreated().getTime())));
+    }
+
+    private ResultActions partiallyAssertServerSide(Feedback singleFeedback, String serverSideFeedbackUrl, int responseSize) throws Exception {
+        ResultActions mvcResult = mvc.perform(get(serverSideFeedbackUrl)
                 .contentType(MediaType.APPLICATION_JSON)).andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.*", hasSize(5)));
+                .andExpect(jsonPath("$.*", hasSize(responseSize)));
         assertFeedbackData(singleFeedback.getCreated().getTime(), "Short message", mvcResult);
         mvcResult.andExpect(jsonPath("$.draw", is(123)));
         mvcResult.andExpect(jsonPath("$.recordsTotal", is(1)));
         mvcResult.andExpect(jsonPath("$.recordsFiltered", is(1)));
-        mvcResult.andExpect(jsonPath("$.newestCreated", is(singleFeedback.getCreated().getTime())));
+        return  mvcResult;
     }
 
     private Feedback mockSingleFeedback(String singleFeedbackMessage, Pageable pageable) {

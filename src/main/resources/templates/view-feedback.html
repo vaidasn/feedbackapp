@@ -28,13 +28,23 @@
                   $(this).addClass('down');
               }
           };
+          var handleFindNewestCreated = true;
           var handleRecent = false;
           var table = $('#all-feedback').DataTable({
               stateSave: true,
               language: {
                   zeroRecords: "No feedback available"
               },
-              ajax: "/data/feedback",
+              ajax: {
+                  url: "/data/feedback",
+                  data: function (d) {
+                      if (handleFindNewestCreated) {
+                          d.findNewestCreated = handleFindNewestCreated;
+                      } else {
+                          delete d.findNewestCreated;
+                      }
+                  }
+              },
               renderer: "bootstrap",
               processing: true,
               serverSide: true,
@@ -70,6 +80,7 @@
                   }
               },
               initComplete: function () {
+                  handleFindNewestCreated = false;
                   if (table.ajax.json().newestCreated + 6000 > new Date().getTime()) {
                       setTimeout(function() {
                           table.column(0).order('asc').draw();

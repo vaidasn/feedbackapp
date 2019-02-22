@@ -31,11 +31,12 @@ public class DataController {
     public Map<String, Object> getFeedbackData(@RequestParam(defaultValue = "-1") int draw, @RequestParam(defaultValue = "0") int start,
             @RequestParam(defaultValue = "-1") int length, @RequestParam(name = "search[value]", required = false) String searchValue,
             @RequestParam(name = "order[0][column]", defaultValue = "0") int orderColumn,
-            @RequestParam(name = "order[0][dir]", required = false) String orderDir) {
+            @RequestParam(name = "order[0][dir]", required = false) String orderDir,
+            @RequestParam(defaultValue = "false") boolean findNewestCreated) {
         if (draw == -1) {
             return allFeedbackData();
         } else {
-            return serverSideFeedbackData(draw, start, length, searchValue, orderColumn, orderDir);
+            return serverSideFeedbackData(draw, start, length, searchValue, orderColumn, orderDir, findNewestCreated);
         }
     }
 
@@ -45,14 +46,16 @@ public class DataController {
     }
 
     private Map<String, Object> serverSideFeedbackData(int draw, int start, int length, String searchValue,
-            int orderColumn, String orderDir) {
+            int orderColumn, String orderDir, boolean findNewestCreated) {
         Page<Feedback> feedbackResult = findFeedback(start, length, searchValue, orderColumn, orderDir);
         Map<String, Object> allFeedback = new HashMap<>();
         allFeedback.put("data", collectFeedbackData(feedbackResult));
         allFeedback.put("draw", draw);
         allFeedback.put("recordsTotal", feedbackRepository.findAllPageable(Pageable.unpaged()).getTotalElements());
         allFeedback.put("recordsFiltered", feedbackResult.getTotalElements());
-        allFeedback.put("newestCreated", findNewestCreated());
+        if (findNewestCreated) {
+            allFeedback.put("newestCreated", findNewestCreated());
+        }
         return allFeedback;
     }
 
